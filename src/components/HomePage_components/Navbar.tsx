@@ -128,8 +128,7 @@ export default function Navbar({ user = null }: NavbarProps) {
             size="icon"
             aria-label="Open menu"
             onClick={() => setOpen(true)}
-            className="text-white hover:bg-white/10 hover:text-white"
-          >
+            className="text-white hover:bg-white/10 hover:text-white lg:hidden">
             <Menu className="size-7" strokeWidth={1.25} />
           </Button>
         </div>
