@@ -35,7 +35,6 @@ interface NavLink {
 const publicLinks: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Browse Services", href: "/services" },
-  { label: "Dashboard", href: "/dashboard" },
 ];
 
 const signInLink: NavLink = { label: "Sign In", href: "/sign-in" };

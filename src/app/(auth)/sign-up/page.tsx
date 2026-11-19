@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -22,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/HomePage_components/Navbar";
+import { authClient } from "@/lib/auth-client";
 
 const bebas = Bebas_Neue({
   weight: "400",
@@ -82,9 +82,7 @@ export default function SignUpPage() {
   }, [profileImagePreview]);
 
   // Handle image selection
-  const handleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
@@ -116,12 +114,41 @@ export default function SignUpPage() {
     setProfileImagePreview("");
     setImageError("");
 
-    const input = document.getElementById(
-      "profile-image"
-    ) as HTMLInputElement;
+    const input = document.getElementById("profile-image") as HTMLInputElement;
 
     if (input) {
       input.value = "";
+    }
+  };
+
+  //   BetterAuth Sign Up Functionality
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const name = (formData.get("name") as string).trim();
+    const email = (formData.get("email") as string).trim();
+    const password = formData.get("password") as string;
+
+    try {
+      // `role` is not sent here: it's `input: false` in src/lib/auth.ts and
+      // defaults to "customer" server-side on user creation.
+      const response = await authClient.signUp.email({
+        name,
+        email,
+        password,
+        image: profileImagePreview || undefined,
+      });
+
+      if (response.error) {
+        console.error("Sign-up error:", response.error.message);
+        return;
+      }
+
+      console.log("Sign-up successful:", response.data);
+    } catch (error) {
+      console.error("Sign-up error:", error);
     }
   };
 
@@ -151,7 +178,7 @@ export default function SignUpPage() {
             <p
               className={cn(
                 bebas.className,
-                "text-2xl tracking-[0.25em] text-[#d98a2b]"
+                "text-2xl tracking-[0.25em] text-[#d98a2b]",
               )}
             >
               Join our community
@@ -162,7 +189,7 @@ export default function SignUpPage() {
             <h1
               className={cn(
                 bebas.className,
-                "mt-6 text-7xl leading-[0.95] tracking-wide xl:text-[88px]"
+                "mt-6 text-7xl leading-[0.95] tracking-wide xl:text-[88px]",
               )}
             >
               Sign up to
@@ -177,10 +204,7 @@ export default function SignUpPage() {
 
             <ul className="mt-10 space-y-4">
               {benefits.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-center gap-4 text-lg"
-                >
+                <li key={item} className="flex items-center gap-4 text-lg">
                   <span className="flex size-8 items-center justify-center rounded-full bg-[#d98a2b] text-[#1a1208]">
                     <Check className="size-5" strokeWidth={3} />
                   </span>
@@ -204,7 +228,7 @@ export default function SignUpPage() {
               <h2
                 className={cn(
                   bebas.className,
-                  "mt-3 text-4xl tracking-wide text-white"
+                  "mt-3 text-4xl tracking-wide text-white",
                 )}
               >
                 Create Account
@@ -215,13 +239,17 @@ export default function SignUpPage() {
               </p>
             </div>
 
-            <div className="mt-8 space-y-4">
+            <form
+              className="mt-8 space-y-4"
+              onSubmit={handleSignUp}
+            >
               {/* Full name */}
               <div className="relative">
                 <User className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/80" />
 
                 <Input
                   type="text"
+                  name="name"
                   placeholder="Full Name"
                   className={inputClasses}
                 />
@@ -233,6 +261,7 @@ export default function SignUpPage() {
 
                 <Input
                   type="email"
+                  name="email"
                   placeholder="Email Address"
                   className={inputClasses}
                 />
@@ -244,6 +273,7 @@ export default function SignUpPage() {
 
                 <Input
                   type={showPassword ? "text" : "password"}
+                  name="password"
                   placeholder="Password"
                   className={cn(inputClasses, "pr-12")}
                 />
@@ -252,9 +282,7 @@ export default function SignUpPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 transition hover:text-[#d98a2b]"
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <Eye className="size-5" />
@@ -273,9 +301,7 @@ export default function SignUpPage() {
                   <ImageIcon className="size-5 shrink-0 text-white/80" />
 
                   <span className="flex-1 truncate text-sm text-white/60">
-                    {profileImage
-                      ? profileImage.name
-                      : "Upload Profile Image"}
+                    {profileImage ? profileImage.name : "Upload Profile Image"}
                   </span>
 
                   <span className="flex h-11 shrink-0 items-center rounded-md bg-[#d98a2b] px-5 font-semibold text-[#1a1208] transition hover:bg-[#c07a22]">
@@ -292,9 +318,7 @@ export default function SignUpPage() {
                 </label>
 
                 {imageError && (
-                  <p className="text-sm text-red-400">
-                    {imageError}
-                  </p>
+                  <p className="text-sm text-red-400">{imageError}</p>
                 )}
 
                 {/* Image preview */}
@@ -340,16 +364,11 @@ export default function SignUpPage() {
                 </span>
 
                 <div>
-                  <p className="text-sm font-semibold">
-                    Password must have:
-                  </p>
+                  <p className="text-sm font-semibold">Password must have:</p>
 
                   <ul className="mt-1 space-y-0.5 text-sm text-white/75">
                     {passwordRules.map((rule) => (
-                      <li
-                        key={rule}
-                        className="flex items-center gap-2"
-                      >
+                      <li key={rule} className="flex items-center gap-2">
                         <span className="size-1 rounded-full bg-[#d98a2b]" />
                         {rule}
                       </li>
@@ -360,7 +379,7 @@ export default function SignUpPage() {
 
               {/* Submit */}
               <Button
-                type="button"
+                type="submit"
                 className="h-12 w-full rounded-lg bg-[#d98a2b] text-base font-semibold text-[#1a1208] hover:bg-[#c07a22]"
               >
                 <UserPlus className="size-5" />
@@ -396,7 +415,7 @@ export default function SignUpPage() {
                   Sign In
                 </Link>
               </p>
-            </div>
+            </form>
           </section>
         </div>
       </main>
