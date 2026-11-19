@@ -1,14 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Bebas_Neue } from "next/font/google";
+import { Rajdhani, Roboto } from "next/font/google";
 
 import { cn } from "@/lib/utils";
 
-const bebas = Bebas_Neue({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-});
+const heading = Rajdhani({ subsets: ["latin"], weight: ["600", "700"] });
+const body = Roboto({ subsets: ["latin"], weight: ["400"] });
 
 export default function HeroSection() {
   return (
@@ -38,21 +35,29 @@ export default function HeroSection() {
 
         <h1
           className={cn(
-            bebas.className,
-            "text-6xl leading-none tracking-wide sm:text-7xl lg:text-[88px]"
+            heading.className,
+            "text-6xl font-bold leading-none tracking-wide sm:text-7xl lg:text-[88px]"
           )}
         >
           Haircut &amp; Shaves
         </h1>
 
-        <p className="mt-6 max-w-2xl text-base leading-8 sm:text-xl">
+        <p
+          className={cn(
+            body.className,
+            "mt-6 max-w-2xl text-base leading-8 sm:text-xl"
+          )}
+        >
           Enjoy &amp; relax in a luxury barber shop environment Top Cut Hair
           Style with Fancy Tradition
         </p>
 
         <Link
           href="/services"
-          className="mt-10 inline-flex h-13.5 items-center justify-center bg-[#d98a2b] px-12 text-sm font-bold uppercase tracking-[0.15em] text-[#1a1208] transition-colors hover:bg-[#c07a22]"
+          className={cn(
+            heading.className,
+            "mt-10 inline-flex h-13.5 items-center justify-center bg-[#d98a2b] px-12 text-sm font-bold uppercase tracking-[0.15em] text-[#1a1208] transition-colors hover:bg-[#c07a22]"
+          )}
         >
           Book Now
         </Link>

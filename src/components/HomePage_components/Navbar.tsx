@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
+import { Rajdhani, Roboto } from "next/font/google";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+
+const heading = Rajdhani({ subsets: ["latin"], weight: ["600", "700"] });
+const body = Roboto({ subsets: ["latin"], weight: ["400"] });
 
 export type UserRole = "customer" | "owner" | "admin";
 
@@ -70,7 +74,7 @@ export default function Navbar({ user = null }: NavbarProps) {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="absolute inset-x-0 top-0 z-50 text-white">
+    <header className={cn(body.className, "absolute inset-x-0 top-0 z-50 text-white")}>
       <nav className="mx-auto flex h-30 max-w-7xl items-center justify-between px-6 lg:px-10">
         {/* Logo */}
         <Link href="/" className="shrink-0" aria-label="HairCutter home">
@@ -80,7 +84,7 @@ export default function Navbar({ user = null }: NavbarProps) {
             width={190}
             height={80}
             priority
-            className="h-auto w-37. sm:w-47.5"
+            className="h-auto w-37.5 sm:w-47.5"
           />
         </Link>
 
@@ -91,7 +95,8 @@ export default function Navbar({ user = null }: NavbarProps) {
               <Link
                 href={link.href}
                 className={cn(
-                  "text-[15px] transition-colors hover:text-[#d98a2b]",
+                  heading.className,
+                  "text-[15px] font-semibold uppercase tracking-wider transition-colors hover:text-[#d98a2b]",
                   isActive(link.href) ? "text-[#d98a2b]" : "text-white"
                 )}
               >
@@ -107,13 +112,21 @@ export default function Navbar({ user = null }: NavbarProps) {
             <div className="hidden items-center gap-3 sm:flex">
               <Link
                 href={signInLink.href}
-                className={cn(outlineClasses, "h-15.5 px-8 text-sm")}
+                className={cn(
+                  heading.className,
+                  outlineClasses,
+                  "h-15.5 px-8 text-sm"
+                )}
               >
                 {signInLink.label}
               </Link>
               <Link
                 href={signUpLink.href}
-                className={cn(ctaClasses, "h-15.5 px-8 text-sm")}
+                className={cn(
+                  heading.className,
+                  ctaClasses,
+                  "h-15.5 px-8 text-sm"
+                )}
               >
                 {signUpLink.label}
               </Link>
@@ -127,7 +140,8 @@ export default function Navbar({ user = null }: NavbarProps) {
             size="icon"
             aria-label="Open menu"
             onClick={() => setOpen(true)}
-            className="text-white hover:bg-white/10 hover:text-white lg:hidden">
+            className="text-white hover:bg-white/10 hover:text-white lg:hidden"
+          >
             <Menu className="size-7" strokeWidth={1.25} />
           </Button>
         </div>
@@ -137,10 +151,15 @@ export default function Navbar({ user = null }: NavbarProps) {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="right"
-          className="w-75 border-white/10 bg-[#120d08] text-white"
+          className={cn(
+            body.className,
+            "w-75 border-white/10 bg-[#120d08] text-white"
+          )}
         >
           <SheetHeader>
-            <SheetTitle className="text-white">Menu</SheetTitle>
+            <SheetTitle className={cn(heading.className, "text-white")}>
+              Menu
+            </SheetTitle>
           </SheetHeader>
 
           <ul className="flex flex-col px-4">
@@ -150,7 +169,8 @@ export default function Navbar({ user = null }: NavbarProps) {
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "block py-4 text-base transition-colors hover:text-[#d98a2b]",
+                    heading.className,
+                    "block py-4 text-base font-semibold uppercase tracking-wider transition-colors hover:text-[#d98a2b]",
                     isActive(link.href) && "text-[#d98a2b]"
                   )}
                 >
@@ -165,14 +185,22 @@ export default function Navbar({ user = null }: NavbarProps) {
               <Link
                 href={signInLink.href}
                 onClick={() => setOpen(false)}
-                className={cn(outlineClasses, "h-12 flex-1 text-sm")}
+                className={cn(
+                  heading.className,
+                  outlineClasses,
+                  "h-12 flex-1 text-sm"
+                )}
               >
                 {signInLink.label}
               </Link>
               <Link
                 href={signUpLink.href}
                 onClick={() => setOpen(false)}
-                className={cn(ctaClasses, "h-12 flex-1 text-sm")}
+                className={cn(
+                  heading.className,
+                  ctaClasses,
+                  "h-12 flex-1 text-sm"
+                )}
               >
                 {signUpLink.label}
               </Link>
