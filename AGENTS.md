@@ -10,44 +10,27 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project
 
-Single-package Next.js 16.4.6 App Router app (`src/` dir). Not a monorepo.
-No CI, pre-commit hooks, tests, or formatter — `npm run lint` and `npx tsc --noEmit` are the only checks.
+Single-package Next.js 16.4.6 App Router app under `src/`. No monorepo, CI, pre-commit hooks, tests, or formatter. Only checks: `npm run lint` (ESLint flat config in `eslint.config.mjs`; there is no `next lint`) and `npx tsc --noEmit` (no typecheck script).
 
-- Auth is **better-auth + MongoDB**: server `src/lib/auth.ts`, client `src/lib/auth-client.ts`,
-  handler `src/app/api/auth/[...all]/route.ts`.
-- Auth requires a running local MongoDB at `mongodb://localhost:27017/database`
-  (hardcoded in `src/lib/auth.ts`) and `.env` with `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL`.
-- `src/lib/utils.ts` re-exports `cn` from the `cn` npm package — don't replace it with the
-  standard clsx/tailwind-merge helper.
-- `auth-client.ts` exports `authClient` (uses `BETTER_AUTH_URL`) *and* bare `signIn/signUp/useSession`
-  from a second client — prefer `authClient.*`.
+## Environment and auth
 
-## Commands
+- `.env` is gitignored, so a fresh checkout has none. Required vars: `MONGODB_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (the last is also read client-side in `src/lib/auth-client.ts`).
+- Auth wiring: `src/lib/auth.ts` (better-auth + `@better-auth/mongo-adapter`), handler `src/app/api/auth/[...all]/route.ts`, client `src/lib/auth-client.ts`. Pages call `authClient.signIn.email` / `authClient.signUp.email`.
+- The connection comes only from `MONGODB_URL`; the database name `HairCutterDB` is hardcoded in `auth.ts` — no local mongod needed.
+- `user.additionalFields.role` is `input: false` with server-side default `"customer"`; don't send `role` from the sign-up client.
+- `src/lib/utils.ts` re-exports `cn` from the `cn` npm package, not clsx/tailwind-merge.
 
-- `npm run dev` — dev server (Turbopack). It also (re)writes the managed blocks in this file;
-  commit `AGENTS.md` changes instead of reverting them. A second managed block
-  (`nextjs-agent-feedback`) may appear — keep both marker blocks intact.
-- `npm run build` / `npm run start`
-- `npm run lint` — ESLint flat config (`eslint.config.mjs`); there is no `next lint`.
-- No typecheck script: run `npx tsc --noEmit`.
+## Next.js 16 gotchas
 
-## Next.js 16 specifics (this project)
-
-- Version-matched docs live at `node_modules/next/dist/docs/` — read them before writing
-  Next code; don't trust training-data APIs (see managed block above).
-- `cacheComponents: true` + `partialPrefetching: true` are enabled: exporting `dynamic`,
-  `revalidate`, or `fetchCache` from a route segment is an **error**. Cache with
-  `'use cache'` + `cacheLife`, wrap runtime data in `<Suspense>`; dev validates
-  "instant navigation" per route. Guide: `node_modules/next/dist/docs/01-app/02-guides/migrating-to-cache-components.md`.
+- Version-matched docs live in `node_modules/next/dist/docs/`; read the relevant page before writing Next code.
+- `next.config.ts` enables `cacheComponents`, `partialPrefetching`, and `reactCompiler`. Exporting `dynamic`, `revalidate`, or `fetchCache` from a route segment is an error: use `'use cache'` + `cacheLife`, and wrap request-time data (e.g. sessions) in `<Suspense>`. Dev validates instant navigation; `export const instant = false` is the temporary opt-out. Guide: `node_modules/next/dist/docs/01-app/02-guides/migrating-to-cache-components.md`.
 - `params` / `searchParams` are Promises — `await` them.
-- `middleware.ts` is renamed to `proxy.ts` (neither exists yet; use `proxy.ts` if adding one).
-- React Compiler is on (`reactCompiler: true`): no impure mutations during render.
+- `middleware.ts` is deprecated and renamed to `proxy.ts` (neither exists yet).
+- `npm run dev` (Turbopack) rewrites the managed marker blocks in this file: `nextjs-agent-rules`, plus `nextjs-agent-feedback` because `experimental.agentFeedback: true`. Only content between markers is replaced; commit the file so dev doesn't leave a dirty tree.
 
-## Styling / UI
+## UI conventions
 
-- Tailwind CSS 4, CSS-first: no `tailwind.config` exists. Theme/imports are in
-  `src/app/globals.css`; CSS is processed via the `@tailwindcss/turbopack` rule in
-  `next.config.ts` — don't add PostCSS/Tailwind config files.
-- shadcn/ui style is `base-nova` (components built on `@base-ui/react`, **not Radix**);
-  config in `components.json`.
-- Path alias: `@/*` → `./src/*`.
+- Tailwind CSS 4, CSS-first: no `tailwind.config`; theme/imports in `src/app/globals.css`, processed by the `@tailwindcss/turbopack` rule in `next.config.ts`. Don't add PostCSS/Tailwind config files.
+- shadcn `base-nova` style built on `@base-ui/react` (`components.json`), not Radix; `lucide` icons.
+- Path alias `@/*` → `./src/*`.
+- `src/app/page.tsx` composes `src/components/HomePage_components/*`; auth pages sit in the `(auth)` route group, so their URLs are `/sign-in` and `/sign-up`.

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Oxanium, Roboto } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const oxanium = Oxanium({
   variable: "--font-oxanium",
@@ -25,7 +26,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${oxanium.variable} ${roboto.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-body">{children}</body>
+      <body className="min-h-full flex flex-col font-body">
+        <main>{children}</main>
+        <Toaster/>
+        
+        
+        </body>
     </html>
   );
 }

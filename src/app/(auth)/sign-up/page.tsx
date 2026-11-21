@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Bebas_Neue } from "next/font/google";
+import { Rajdhani, Roboto } from "next/font/google";
 
 import {
   ArrowRight,
@@ -22,12 +22,11 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/HomePage_components/Navbar";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-const bebas = Bebas_Neue({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-});
+const heading = Rajdhani({ subsets: ["latin"], weight: ["600", "700"] });
+const body = Roboto({ subsets: ["latin"], weight: ["400", "500"] });
 
 const benefits = [
   "Book Appointments Easily",
@@ -70,7 +69,9 @@ function GoogleIcon() {
 export default function SignUpPage() {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [imageError, setImageError] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -81,8 +82,8 @@ export default function SignUpPage() {
     };
   }, [profileImagePreview]);
 
-  // Handle image selection
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle image selection (uploads to imgbb)
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
@@ -91,6 +92,7 @@ export default function SignUpPage() {
       setImageError("Please select a valid image.");
       setProfileImage(null);
       setProfileImagePreview("");
+      setUploadedImageUrl("");
       e.target.value = "";
       return;
     }
@@ -99,6 +101,7 @@ export default function SignUpPage() {
       setImageError("Image size must be less than 5MB.");
       setProfileImage(null);
       setProfileImagePreview("");
+      setUploadedImageUrl("");
       e.target.value = "";
       return;
     }
@@ -106,12 +109,45 @@ export default function SignUpPage() {
     setImageError("");
     setProfileImage(file);
     setProfileImagePreview(URL.createObjectURL(file));
+    setUploadedImageUrl("");
+    setUploading(true);
+
+    try {
+      const imgbbFormData = new FormData();
+      imgbbFormData.append("image", file);
+
+      const imageAPI = `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`;
+
+      const res = await fetch(imageAPI, {
+        method: "POST",
+        body: imgbbFormData,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result?.error?.message ?? "Upload failed");
+      }
+
+      setUploadedImageUrl(result.data.url);
+      console.log("Image uploaded to imgbb:", result.data.url);
+    } catch (error) {
+      console.error("Image upload error:", error);
+      setImageError("Could not upload the image. Please try again.");
+      setProfileImage(null);
+      setProfileImagePreview("");
+      setUploadedImageUrl("");
+      e.target.value = "";
+    } finally {
+      setUploading(false);
+    }
   };
 
   // Remove selected image
   const handleRemoveImage = () => {
     setProfileImage(null);
     setProfileImagePreview("");
+    setUploadedImageUrl("");
     setImageError("");
 
     const input = document.getElementById("profile-image") as HTMLInputElement;
@@ -121,15 +157,26 @@ export default function SignUpPage() {
     }
   };
 
-  //   BetterAuth Sign Up Functionality
+  // BetterAuth Sign Up Functionality
+
+  const router = useRouter();
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Wait until the imgbb upload finishes so the image URL isn't lost.
+    if (uploading) {
+      toast.info("Image is still uploading. Please wait a moment.");
+      return;
+    }
 
     const formData = new FormData(e.currentTarget);
 
     const name = (formData.get("name") as string).trim();
     const email = (formData.get("email") as string).trim();
     const password = formData.get("password") as string;
+
+    // Image is already uploaded to imgbb in handleImageChange.
+    const image = uploadedImageUrl || undefined;
 
     try {
       // `role` is not sent here: it's `input: false` in src/lib/auth.ts and
@@ -138,22 +185,33 @@ export default function SignUpPage() {
         name,
         email,
         password,
-        image: profileImagePreview || undefined,
+        image,
       });
 
       if (response.error) {
         console.error("Sign-up error:", response.error.message);
+        toast.error(response.error.message);
         return;
       }
 
       console.log("Sign-up successful:", response.data);
+
+      toast.success("Account created successfully!");
+
+      router.push("/");
+      router.refresh();
     } catch (error) {
       console.error("Sign-up error:", error);
+      toast.error("Something went wrong. Please try again.");
     }
   };
-
   return (
-    <div className="flex min-h-screen flex-col bg-[#0b0805] text-white">
+    <div
+      className={cn(
+        body.className,
+        "flex min-h-screen flex-col bg-[#0b0805] text-white",
+      )}
+    >
       <main className="relative flex-1">
         <Navbar />
 
@@ -177,8 +235,8 @@ export default function SignUpPage() {
           <section className="hidden lg:block">
             <p
               className={cn(
-                bebas.className,
-                "text-2xl tracking-[0.25em] text-[#d98a2b]",
+                heading.className,
+                "text-2xl font-bold uppercase tracking-[0.25em] text-[#d98a2b]",
               )}
             >
               Join our community
@@ -188,8 +246,8 @@ export default function SignUpPage() {
 
             <h1
               className={cn(
-                bebas.className,
-                "mt-6 text-7xl leading-[0.95] tracking-wide xl:text-[88px]",
+                heading.className,
+                "mt-6 text-7xl font-bold leading-[0.95] tracking-wide xl:text-[88px]",
               )}
             >
               Sign up to
@@ -227,8 +285,8 @@ export default function SignUpPage() {
 
               <h2
                 className={cn(
-                  bebas.className,
-                  "mt-3 text-4xl tracking-wide text-white",
+                  heading.className,
+                  "mt-3 text-4xl font-bold tracking-wide text-white",
                 )}
               >
                 Create Account
@@ -239,10 +297,7 @@ export default function SignUpPage() {
               </p>
             </div>
 
-            <form
-              className="mt-8 space-y-4"
-              onSubmit={handleSignUp}
-            >
+            <form className="mt-8 space-y-4" onSubmit={handleSignUp}>
               {/* Full name */}
               <div className="relative">
                 <User className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-white/80" />
@@ -380,6 +435,7 @@ export default function SignUpPage() {
               {/* Submit */}
               <Button
                 type="submit"
+                aria-busy={uploading}
                 className="h-12 w-full rounded-lg bg-[#d98a2b] text-base font-semibold text-[#1a1208] hover:bg-[#c07a22]"
               >
                 <UserPlus className="size-5" />
@@ -421,4 +477,4 @@ export default function SignUpPage() {
       </main>
     </div>
   );
-}
+};

@@ -1,10 +1,10 @@
-
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Bebas_Neue } from "next/font/google";
+import { useRouter } from "next/navigation";
+import { Rajdhani, Roboto } from "next/font/google";
 
 import {
   ArrowRight,
@@ -19,15 +19,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/HomePage_components/Navbar";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
-const bebas = Bebas_Neue({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-});
+const heading = Rajdhani({ subsets: ["latin"], weight: ["600", "700"] });
+const body = Roboto({ subsets: ["latin"], weight: ["400", "500"] });
 
 const inputClasses =
   "h-12 rounded-lg border-white/25 bg-black/30 pl-12 text-base text-white placeholder:text-white/60 focus-visible:border-[#d98a2b] focus-visible:ring-[#d98a2b]/30";
+
+
 
 function GoogleIcon() {
   return (
@@ -57,10 +58,55 @@ function GoogleIcon() {
 }
 
 export default function SignInPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setErrorMessage("");
+  setSuccessMessage("");
+
+  const formData = new FormData(e.currentTarget);
+  const email = (formData.get("email") as string).trim();
+  const password = formData.get("password") as string;
+  const remember = formData.get("remember") === "on";
+
+  setLoading(true);
+
+  try {
+    const { error } = await authClient.signIn.email({
+      email,
+      password,
+      rememberMe: remember,
+    });
+
+    if (error) {
+      setErrorMessage(error.message || "Invalid email or password.");
+      return;
+    }
+
+    toast.success("Signed in successfully!");
+
+    router.push("/");
+    router.refresh();
+  } catch (err) {
+    console.error("Sign-in error:", err);
+    setErrorMessage("Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0b0805] text-white">
+    <div
+      className={cn(
+        body.className,
+        "flex min-h-screen flex-col bg-[#0b0805] text-white"
+      )}
+    >
       <main className="relative flex-1">
 
         {/* Navbar */}
@@ -89,8 +135,8 @@ export default function SignInPage() {
 
             <p
               className={cn(
-                bebas.className,
-                "text-2xl tracking-[0.25em] text-[#d98a2b]"
+                heading.className,
+                "text-2xl font-bold uppercase tracking-[0.25em] text-[#d98a2b]"
               )}
             >
               Welcome Back
@@ -100,8 +146,8 @@ export default function SignInPage() {
 
             <h1
               className={cn(
-                bebas.className,
-                "mt-6 text-7xl leading-[0.95] tracking-wide xl:text-[88px]"
+                heading.className,
+                "mt-6 text-7xl font-bold leading-[0.95] tracking-wide xl:text-[88px]"
               )}
             >
               YOUR STYLE,
@@ -153,8 +199,8 @@ export default function SignInPage() {
 
               <h2
                 className={cn(
-                  bebas.className,
-                  "mt-3 text-4xl tracking-wide text-white"
+                  heading.className,
+                  "mt-3 text-4xl font-bold tracking-wide text-white"
                 )}
               >
                 Sign In
@@ -166,7 +212,7 @@ export default function SignInPage() {
 
             </div>
 
-            <div className="mt-8 space-y-5">
+            <form onSubmit={handleSignIn} className="mt-8 space-y-5">
 
               {/* Email Field */}
               <div className="relative">
@@ -175,6 +221,8 @@ export default function SignInPage() {
 
                 <Input
                   type="email"
+                  name="email"
+                  required
                   placeholder="Email Address"
                   className={inputClasses}
                 />
@@ -188,6 +236,8 @@ export default function SignInPage() {
 
                 <Input
                   type={showPassword ? "text" : "password"}
+                  name="password"
+                  required
                   placeholder="Password"
                   className={cn(inputClasses, "pr-12")}
                 />
@@ -215,6 +265,7 @@ export default function SignInPage() {
                 <input
                   type="checkbox"
                   id="remember"
+                  name="remember"
                   className="size-4 accent-[#d98a2b]"
                 />
 
@@ -225,18 +276,27 @@ export default function SignInPage() {
               </div>
 
               {/* Success Message UI */}
-              {/* Add success message here when login succeeds */}
+              {successMessage && (
+                <p className="rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+                  {successMessage}
+                </p>
+              )}
 
               {/* Error Message UI */}
-              {/* Add error message here when login fails */}
+              {errorMessage && (
+                <p className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                  {errorMessage}
+                </p>
+              )}
 
               {/* Sign In Button */}
               <Button
-                type="button"
-                className="h-12 w-full rounded-lg bg-[#d98a2b] text-base font-semibold text-[#1a1208] hover:bg-[#c07a22]"
+                type="submit"
+                disabled={loading}
+                className="h-12 w-full rounded-lg bg-[#d98a2b] text-base font-semibold text-[#1a1208] hover:bg-[#c07a22] disabled:opacity-60"
               >
                 <LogIn className="size-5" />
-                Sign In
+                {loading ? "Signing in..." : "Sign In"}
                 <ArrowRight className="size-5" />
               </Button>
 
@@ -275,7 +335,7 @@ export default function SignInPage() {
 
               </p>
 
-            </div>
+            </form>
           </section>
         </div>
       </main>
