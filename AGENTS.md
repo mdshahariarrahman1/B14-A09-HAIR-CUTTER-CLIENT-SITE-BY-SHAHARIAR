@@ -10,15 +10,20 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project
 
-Single-package Next.js 16.4.6 App Router app under `src/`. No monorepo, CI, pre-commit hooks, tests, or formatter. Only checks: `npm run lint` (ESLint flat config in `eslint.config.mjs`; there is no `next lint`) and `npx tsc --noEmit` (no typecheck script).
+Single-package Next.js 16.4.6 App Router app under `src/`. No monorepo, CI, pre-commit hooks, tests, or formatter. Only checks: `npm run lint` (ESLint flat config in `eslint.config.mjs`; there is no `next lint`) and `npx tsc --noEmit` (no typecheck script). npm is the only package manager (`package-lock.json`; no other lockfiles). `README.md` is stock create-next-app boilerplate (it points at `app/page.tsx` and lists other package managers) — trust the source/config over it.
 
 ## Environment and auth
 
-- `.env` is gitignored, so a fresh checkout has none. Required vars: `MONGODB_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (the last is also read client-side in `src/lib/auth-client.ts`).
+- `.env` is gitignored, so a fresh checkout has none. Required vars: `MONGODB_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (also read client-side in `src/lib/auth-client.ts`), `NEXT_PUBLIC_IMGBB_API_KEY` (client-side imgbb profile-image upload on sign-up), `BACKEND_URL` (see below).
 - Auth wiring: `src/lib/auth.ts` (better-auth + `@better-auth/mongo-adapter`), handler `src/app/api/auth/[...all]/route.ts`, client `src/lib/auth-client.ts`. Pages call `authClient.signIn.email` / `authClient.signUp.email`.
+- Only email/password auth is enabled in `auth.ts`; the "Google" buttons on the auth pages are UI-only (no social provider configured).
 - The connection comes only from `MONGODB_URL`; the database name `HairCutterDB` is hardcoded in `auth.ts` — no local mongod needed.
 - `user.additionalFields.role` is `input: false` with server-side default `"customer"`; don't send `role` from the sign-up client.
 - `src/lib/utils.ts` re-exports `cn` from the `cn` npm package, not clsx/tailwind-merge.
+
+## External backend
+
+- The homepage's "Featured Salon Services" section (`src/components/HomePage_components/ServicesSix.tsx`, a server component) fetches `${BACKEND_URL}/services_six` (dev value `http://localhost:5000`) with `next: { revalidate: 60 }`; that service is not in this repo. Fetch failures are swallowed and the section renders an empty state, so a blank section means a missing/unreachable backend, not a UI bug.
 
 ## Next.js 16 gotchas
 

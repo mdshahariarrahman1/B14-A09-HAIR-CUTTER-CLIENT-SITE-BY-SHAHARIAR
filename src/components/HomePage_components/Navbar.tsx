@@ -52,6 +52,7 @@ const dashboardByRole: Record<UserRole, string> = {
 
 const getAuthLinks = (role: UserRole): NavLink[] => [
   { label: "Home", href: "/" },
+  { label: "Browse Services", href: "/services" },
   { label: "Salon Details", href: "/salons" },
   { label: "Dashboard", href: dashboardByRole[role] ?? "/dashboard" },
 ];
