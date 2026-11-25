@@ -21,9 +21,20 @@ Single-package Next.js 16.4.6 App Router app under `src/`. No monorepo, CI, pre-
 - `user.additionalFields.role` is `input: false` with server-side default `"customer"`; don't send `role` from the sign-up client.
 - `src/lib/utils.ts` re-exports `cn` from the `cn` npm package, not clsx/tailwind-merge.
 
-## External backend
+## External backend (not in this repo)
 
-- The homepage's "Featured Salon Services" section (`src/components/HomePage_components/ServicesSix.tsx`, a server component) fetches `${BACKEND_URL}/services_six` (dev value `http://localhost:5000`) with `next: { revalidate: 60 }`; that service is not in this repo. Fetch failures are swallowed and the section renders an empty state, so a blank section means a missing/unreachable backend, not a UI bug.
+Dev value of `BACKEND_URL` is `http://localhost:5000`. Three server-side fetches hit it; all swallow errors and render an empty / "not found" state, so blank data means a missing or unreachable backend, not a UI bug.
+
+- `GET /services_six` — homepage "Featured Salon Services" (`src/components/HomePage_components/ServicesSix.tsx`), `next: { revalidate: 60 }`.
+- `GET /services` — services listing (`src/app/services/page.tsx`), `next: { revalidate: 60 }`; search/filter/sort/pagination happen client-side in `ServicesBrowser.tsx`.
+- `GET /services/[id]` — detail page (`src/app/services/[id]/page.tsx`), `cache: "no-store"`; ids must match `/^[a-f\d]{24}$/` (Mongo ObjectId) or the page shows "Invalid service".
+- Docs are expected to have `_id` (string or `{$oid}`), `isActive`, `price`, `duration`, etc.; inactive docs are filtered out.
+
+## Wiring that is not finished
+
+- Service links use the singular `/service` / `/service/${id}` (`ServicesBrowser.tsx` and the detail page's back links), but the only route folder is `src/app/services/` (plural), so the working URLs are `/services` and `/services/[id]`. Those links currently 404.
+- `BookingForm.tsx` POSTs to `/api/appointments`; no such route file exists (there is an "Adjust this endpoint" TODO), so booking requests currently 404.
+- The detail page expects login protection in a future `proxy.ts` (comment in the file; no file yet) and hardcodes `isAdmin = false` with a TODO, so role-based gating from the `role` field is not wired up.
 
 ## Next.js 16 gotchas
 
@@ -31,11 +42,12 @@ Single-package Next.js 16.4.6 App Router app under `src/`. No monorepo, CI, pre-
 - `next.config.ts` enables `cacheComponents`, `partialPrefetching`, and `reactCompiler`. Exporting `dynamic`, `revalidate`, or `fetchCache` from a route segment is an error: use `'use cache'` + `cacheLife`, and wrap request-time data (e.g. sessions) in `<Suspense>`. Dev validates instant navigation; `export const instant = false` is the temporary opt-out. Guide: `node_modules/next/dist/docs/01-app/02-guides/migrating-to-cache-components.md`.
 - `params` / `searchParams` are Promises — `await` them.
 - `middleware.ts` is deprecated and renamed to `proxy.ts` (neither exists yet).
-- `npm run dev` (Turbopack) rewrites the managed marker blocks in this file: `nextjs-agent-rules`, plus `nextjs-agent-feedback` because `experimental.agentFeedback: true`. Only content between markers is replaced; commit the file so dev doesn't leave a dirty tree.
+- `npm run dev` (Turbopack) regenerates the managed marker blocks in this file: `nextjs-agent-rules`, and `nextjs-agent-feedback` when feedback exists (`experimental.agentFeedback: true`). Only content between markers is replaced; commit the file so dev doesn't leave a dirty tree.
 
 ## UI conventions
 
 - Tailwind CSS 4, CSS-first: no `tailwind.config`; theme/imports in `src/app/globals.css`, processed by the `@tailwindcss/turbopack` rule in `next.config.ts`. Don't add PostCSS/Tailwind config files.
 - shadcn `base-nova` style built on `@base-ui/react` (`components.json`), not Radix; `lucide` icons.
+- Several components load Google fonts via `next/font/google` (Teko, Roboto, Rajdhani, Inter, Playfair_Display); dev/build need network access to fetch them.
 - Path alias `@/*` → `./src/*`.
 - `src/app/page.tsx` composes `src/components/HomePage_components/*`; auth pages sit in the `(auth)` route group, so their URLs are `/sign-in` and `/sign-up`.

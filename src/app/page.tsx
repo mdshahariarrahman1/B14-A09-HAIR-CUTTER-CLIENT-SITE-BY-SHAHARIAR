@@ -1,5 +1,4 @@
 import { AboutVideoSection } from '@/components/HomePage_components/AboutVideoSection';
-import FooterSection from '@/components/HomePage_components/FooterSection';
 import HeroSection from '@/components/HomePage_components/HeroSection';
 import Navbar from '@/components/HomePage_components/Navbar';
 import PriceTable from '@/components/HomePage_components/PriceTable';
@@ -15,7 +14,6 @@ const HomePage = () => {
       <AboutVideoSection />
       <ServicesSixPage/>
       <PriceTable />
-      <FooterSection />
     </div>
   );
 };

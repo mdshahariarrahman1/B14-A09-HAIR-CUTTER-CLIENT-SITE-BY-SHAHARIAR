@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Oxanium, Roboto } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-
+import FooterSection from "@/components/HomePage_components/FooterSection";
 const oxanium = Oxanium({
   variable: "--font-oxanium",
   subsets: ["latin"],
@@ -28,10 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col font-body">
         <main>{children}</main>
-        <Toaster/>
-        
-        
-        </body>
+        <Toaster />
+        <FooterSection />
+      </body>
     </html>
   );
 }
