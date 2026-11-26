@@ -21,9 +21,8 @@ type ServiceDoc = {
 
 async function getServicesSix(): Promise<Service[]> {
   try {
-    const res = await fetch(`${process.env.BACKEND_URL}/services_six`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(`${process.env.BACKEND_URL}/services_six`, { cache: "no-store" });
+    if (!res.ok) return [];
 
     if (!res.ok) return [];
 

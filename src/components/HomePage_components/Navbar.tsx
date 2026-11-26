@@ -28,7 +28,7 @@ import { signOut, useSession } from "@/lib/auth-client";
 const heading = Rajdhani({ subsets: ["latin"], weight: ["600", "700"] });
 const body = Roboto({ subsets: ["latin"], weight: ["400"] });
 
-export type UserRole = "customer" | "owner" | "admin";
+export type UserRole = "customer" | "admin";
 
 interface NavLink {
   label: string;
@@ -46,7 +46,6 @@ const signUpLink: NavLink = { label: "Sign Up", href: "/sign-up" };
 
 const dashboardByRole: Record<UserRole, string> = {
   customer: "/dashboard/customer",
-  owner: "/dashboard/owner",
   admin: "/dashboard/admin",
 };
 
@@ -65,9 +64,7 @@ const ctaClasses =
 const outlineClasses =
   "inline-flex items-center justify-center border border-[#d98a2b] font-bold uppercase tracking-[0.15em] text-[#d98a2b] transition-colors hover:bg-[#d98a2b] hover:text-[#1a1208]";
 
-/* -------------------------------------------------------------------------- */
-/*                                  User menu                                 */
-/* -------------------------------------------------------------------------- */
+
 
 interface UserMenuProps {
   name: string;
@@ -160,7 +157,11 @@ function UserMenu({
 /*                                   Navbar                                   */
 /* -------------------------------------------------------------------------- */
 
-export default function Navbar() {
+export default function Navbar({
+  variant = "overlay",
+}: {
+  variant?: "overlay" | "solid";
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -192,9 +193,19 @@ export default function Navbar() {
 
   return (
     <header
-      className={cn(body.className, "absolute inset-x-0 top-0 z-50 text-white")}
+      className={cn(
+        body.className,
+        variant === "solid"
+          ? "sticky top-0 z-50 w-full border-b border-white/10 bg-[#1a1208] text-white"
+          : "absolute inset-x-0 top-0 z-50 text-white"
+      )}
     >
-      <nav className="mx-auto flex h-30 max-w-7xl items-center justify-between px-6 lg:px-10">
+      <nav
+        className={cn(
+          "mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-10",
+          variant === "solid" ? "h-20" : "h-30"
+        )}
+      >
         {/* Logo */}
         <Link href="/" className="shrink-0" aria-label="HairCutter home">
           <Image

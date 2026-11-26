@@ -3,6 +3,7 @@ import { Oxanium, Roboto } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import FooterSection from "@/components/HomePage_components/FooterSection";
+import SiteNavbar from "@/components/SiteNavbar";
 const oxanium = Oxanium({
   variable: "--font-oxanium",
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${oxanium.variable} ${roboto.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-body">
+        <SiteNavbar />
         <main>{children}</main>
         <Toaster />
         <FooterSection />

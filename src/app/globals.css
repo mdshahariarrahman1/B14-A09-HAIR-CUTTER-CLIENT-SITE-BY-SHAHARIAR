@@ -118,6 +118,43 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Dashboard-only token overrides: shadcn components stay on-brand without
+   changing the public site's palette. */
+.dashboard-scope {
+    --background: #fdfbf9;
+    --foreground: #333333;
+    --card: #ffffff;
+    --card-foreground: #333333;
+    --popover: #ffffff;
+    --popover-foreground: #333333;
+    --primary: #d98a2b;
+    --primary-foreground: #1a1208;
+    --secondary: #f6f1ea;
+    --secondary-foreground: #333333;
+    --muted: #f3ece3;
+    --muted-foreground: #8a7d80;
+    --accent: #f6ede1;
+    --accent-foreground: #1a1208;
+    --destructive: #c0392b;
+    --border: #eee6df;
+    --input: #eee6df;
+    --ring: #d98a2b;
+    --chart-1: #d98a2b;
+    --chart-2: #1a1208;
+    --chart-3: #8a7d80;
+    --chart-4: #c07a22;
+    --chart-5: #2f6b4f;
+    --radius: 0.75rem;
+    --sidebar: #120d08;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #d98a2b;
+    --sidebar-primary-foreground: #1a1208;
+    --sidebar-accent: #2a1f16;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #ffffff1a;
+    --sidebar-ring: #d98a2b;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/HomePage_components/Navbar";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -213,8 +212,6 @@ export default function SignUpPage() {
       )}
     >
       <main className="relative flex-1">
-        <Navbar />
-
         {/* Background image + overlay */}
         <Image
           src="/images/img-71.webp"

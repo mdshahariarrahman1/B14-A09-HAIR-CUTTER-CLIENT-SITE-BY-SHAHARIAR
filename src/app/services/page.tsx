@@ -23,9 +23,8 @@ type ServiceDoc = {
 
 async function getServices(): Promise<BrowseService[]> {
   try {
-    const res = await fetch(`${process.env.BACKEND_URL}/services`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(`${process.env.BACKEND_URL}/services`, { cache: "no-store" }
+    );
     if (!res.ok) return [];
 
     const data: ServiceDoc[] = await res.json();

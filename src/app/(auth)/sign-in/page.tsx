@@ -18,7 +18,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/HomePage_components/Navbar";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 
@@ -108,10 +107,6 @@ export default function SignInPage() {
       )}
     >
       <main className="relative flex-1">
-
-        {/* Navbar */}
-        <Navbar />
-
         {/* Background Image */}
         <Image
           src="/images/img-71.webp"
