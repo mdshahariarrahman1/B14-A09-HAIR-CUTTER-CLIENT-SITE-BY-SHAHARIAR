@@ -13,8 +13,10 @@ type ServiceDoc = {
   name: string;
   category: string;
   price: number | string;
-  duration: string;
+  duration?: string | number;
+  durationMinutes?: number | string;
   shortDescription?: string;
+  description?: string;
   image?: string;
   isActive?: boolean;
 };
@@ -35,8 +37,12 @@ async function getServicesSix(): Promise<Service[]> {
         name: doc.name,
         category: doc.category,
         price: Number(doc.price),
-        duration: doc.duration,
-        shortDescription: doc.shortDescription ?? "",
+        duration:
+          typeof doc.duration === "number"
+            ? `${doc.duration} min`
+            : doc.duration ||
+              (doc.durationMinutes != null ? `${doc.durationMinutes} min` : ""),
+        shortDescription: doc.shortDescription ?? doc.description ?? "",
         image: doc.image ?? "",
       }));
   } catch (error) {

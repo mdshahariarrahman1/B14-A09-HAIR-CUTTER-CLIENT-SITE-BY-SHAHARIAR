@@ -14,8 +14,10 @@ type ServiceDoc = {
   name: string;
   category: string;
   price: number | string;
-  duration: string | number;
+  duration?: string | number;
+  durationMinutes?: number | string;
   shortDescription?: string;
+  description?: string;
   image?: string;
   isActive?: boolean;
   createdAt?: string;
@@ -39,8 +41,11 @@ async function getServices(): Promise<BrowseService[]> {
           category: doc.category,
           price: Number(doc.price),
           duration:
-            typeof doc.duration === "number" ? `${doc.duration} min` : doc.duration,
-          shortDescription: doc.shortDescription ?? "",
+            typeof doc.duration === "number"
+              ? `${doc.duration} min`
+              : doc.duration ||
+                (doc.durationMinutes != null ? `${doc.durationMinutes} min` : ""),
+          shortDescription: doc.shortDescription ?? doc.description ?? "",
           image: doc.image ?? "",
           // Mongo ObjectId's first 4 bytes are a timestamp -> fallback for "newest"
           createdAt: doc.createdAt

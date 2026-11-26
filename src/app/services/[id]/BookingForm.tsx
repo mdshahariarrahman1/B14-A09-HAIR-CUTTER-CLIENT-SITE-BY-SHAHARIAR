@@ -12,10 +12,11 @@ const label = "mb-1.5 block text-xs font-medium uppercase tracking-wider text-[#
 const MAX_BOOKING_MINUTES = 8 * 60;
 
 // "90 min" | "30 mins" | "1 hr" | "1.5 hours" | "1h 30m" | 45 -> minutes
-function parseDurationMinutes(value: string | number): number {
+function parseDurationMinutes(value: string | number | undefined | null): number {
   if (typeof value === "number") return value > 0 ? value : 60;
+  if (value == null) return 60;
 
-  const text = value.toLowerCase();
+  const text = String(value).toLowerCase();
   const hours = text.match(/(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hour|hours)/);
   const mins = text.match(/(\d+(?:\.\d+)?)\s*(?:m|min|mins|minute|minutes)/);
 
@@ -47,7 +48,7 @@ export default function BookingForm({
   serviceId: string;
   serviceName: string;
   price: number; // price for one service duration (e.g. $150 for 90 min)
-  duration: string | number; // e.g. "90 min"
+  duration?: string | number | null; // e.g. "90 min"
   headingClassName?: string;
 }) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");

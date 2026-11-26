@@ -27,12 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { signOut, useSession } from "@/lib/auth-client";
-import {
-  dashboardHome,
-  dashboardLabels,
-  dashboardLinks,
-  type DashboardRole,
-} from "./config";
+import { dashboardLabels, dashboardLinks, type DashboardRole } from "./config";
 
 const LOGO = "/images/HairCutter-2.png";
 
@@ -88,8 +83,15 @@ export default function DashboardShell({
   const image = user?.image ?? undefined;
   const links = dashboardLinks[role];
 
-  const isActive = (href: string) =>
-    href === dashboardHome[role] ? pathname === href : pathname.startsWith(href);
+  // Only the most specific matching link is active, so a parent link like
+  // /services doesn't also highlight on /services/new.
+  const activeHref = links
+    .filter(
+      (link) => pathname === link.href || pathname.startsWith(`${link.href}/`)
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
+  const isActive = (href: string) => activeHref === href;
 
   const handleSignOut = async () => {
     await signOut({

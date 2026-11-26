@@ -3,7 +3,11 @@ import { ArrowLeft } from "lucide-react";
 
 import PageHeader from "@/components/dashboard/PageHeader";
 import ServiceForm from "@/components/dashboard/ServiceForm";
-import { services } from "@/components/dashboard/mock-data";
+import {
+  toDashboardService,
+  type DashboardService,
+  type ServiceDoc,
+} from "@/components/dashboard/service-data";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -13,7 +17,19 @@ export default async function EditServicePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const service = services.find((item) => item.id === id);
+
+  let service: DashboardService | undefined;
+  try {
+    const res = await fetch(`${process.env.BACKEND_URL}/services`, {
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const data: ServiceDoc[] = await res.json();
+      service = data.map(toDashboardService).find((item) => item.id === id);
+    }
+  } catch (error) {
+    console.error("Failed to load service:", error);
+  }
 
   if (!service) {
     return (
